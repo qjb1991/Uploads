@@ -9,11 +9,18 @@
 // | Author: liu21st <liu21st@gmail.com>
 // +----------------------------------------------------------------------
 
+use think\facade\Route;
+
 Route::get('think', function () {
     return 'hello,ThinkPHP5!';
 });
 
 Route::get('hello/:name', 'index/hello');
+
+Route::group('api', function () {
+    Route::post('token', 'uploader/token');
+})->prefix('api/');
+
 
 return [
 

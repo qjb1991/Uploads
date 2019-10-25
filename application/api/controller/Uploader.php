@@ -2,84 +2,69 @@
 
 namespace app\api\controller;
 
-use think\Controller;
-use think\Request;
+use app\api\validate\FileData;
+use app\common\controller\BaseApi;
+use app\common\lib\Utils;
+use think\facade\Config;
+use think\facade\Response;
+use think\response\Json;
 
-class Uploader extends Controller
+class Uploader extends BaseApi
 {
-    /**
-     * 显示资源列表
-     *
-     * @return \think\Response
-     */
     public function index()
     {
-        //
+        // todo
     }
 
     /**
-     * 显示创建资源表单页.
-     *
-     * @return \think\Response
+     * 获取上传token
+     * @return bool|object|\think\response
      */
-    public function create()
+    public function token()
     {
-        //
+        // token
+        $access = $this->access();
+        if ($access instanceof Json) {
+            return $access;
+        }
+
+        if (!$access) {
+            return $this->response(['code' => CODE_TOKEN_ERROR, 'msg' => '身份校验失败']);
+        }
+
+        $type = $this->request->post('type');
+        $validate = new FileData();
+        if (!$validate->hasType($access->scope, $type)) {
+            return $this->response(['code' => CODE_TOKEN_ERROR, 'msg' => '类型受限']);
+        }
+
+        $token = Utils::uploadTokenSave($access, $type, Config::get('upload.expire_token_time'));
+
+        return $this->response($token['token']);
     }
 
     /**
-     * 保存新建的资源
-     *
-     * @param  \think\Request  $request
-     * @return \think\Response
+     * 用户token验证
+     * @return bool|object|\think\response
      */
-    public function save(Request $request)
+    public function access()
     {
-        //
+        $app_name = $this->request->header(Config::get('upload.app_project_name'));
+        $project_name = explode(',', Config::get('upload.app_project'));
+
+        if (!in_array($app_name, $project_name)) {
+            return $this->response(['code' => CODE_UNKNOWN_APP, 'msg' => MSG_UNKNOWN_APP]);
+        }
+
+        $token = $this->request->header(Config::get('upload.app_token_name'));
+
+        if (empty($token)) {
+            return $this->response(['code' => CODE_UNKNOWN_AUTH, 'msg' => MSG_UNKNOWN_AUTH]);
+        }
+
+        $data = Utils::isAliveToken($token, $app_name);
+
+        return $data;
     }
 
-    /**
-     * 显示指定的资源
-     *
-     * @param  int  $id
-     * @return \think\Response
-     */
-    public function read($id)
-    {
-        //
-    }
-
-    /**
-     * 显示编辑资源表单页.
-     *
-     * @param  int  $id
-     * @return \think\Response
-     */
-    public function edit($id)
-    {
-        //
-    }
-
-    /**
-     * 保存更新的资源
-     *
-     * @param  \think\Request  $request
-     * @param  int  $id
-     * @return \think\Response
-     */
-    public function update(Request $request, $id)
-    {
-        //
-    }
-
-    /**
-     * 删除指定资源
-     *
-     * @param  int  $id
-     * @return \think\Response
-     */
-    public function delete($id)
-    {
-        //
-    }
 }
