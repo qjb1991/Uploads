@@ -17,7 +17,7 @@ class Uploader extends BaseApi
     }
 
     /**
-     * 获取上传token
+     * 获取上传令牌
      * @return bool|object|\think\response
      */
     public function token()

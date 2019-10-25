@@ -9,11 +9,22 @@
 namespace app\common\controller;
 
 
+use think\App;
 use think\Controller;
 use think\facade\Response;
 
 class BaseApi extends Controller
 {
+    public function __construct(App $app = null)
+    {
+        parent::__construct($app);
+    }
+
+    public function __initialise()
+    {
+
+    }
+
     public function response($data, $code = CODE_UNKNOWN_ERROR)
     {
         if ($data instanceof \Exception) {
