@@ -19,6 +19,7 @@ Route::get('hello/:name', 'index/hello');
 
 Route::group('api', function () {
     Route::post('token', 'uploader/token');
+    Route::post('index', 'uploader/index');
 })->prefix('api/');
 
 

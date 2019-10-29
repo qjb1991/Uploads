@@ -34,6 +34,9 @@ return [
     ],
 
     // 上传token有效时间
-    'expire_token_time' => 3600.
+    'expire_token_time' => 3600,
+
+    'upload_domain' => 'http://file.upload.com/',
+    'upload_save_path' => dirname(__DIR__).DIRECTORY_SEPARATOR.'upload',
 
 ];

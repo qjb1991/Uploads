@@ -18,11 +18,12 @@ class BaseApi extends Controller
     public function __construct(App $app = null)
     {
         parent::__construct($app);
+        $this->initialize();
     }
 
     public function __initialise()
     {
-
+        // todo
     }
 
     public function response($data, $code = CODE_UNKNOWN_ERROR)

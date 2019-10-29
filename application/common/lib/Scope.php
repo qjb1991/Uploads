@@ -20,4 +20,9 @@ class Scope
     {
         return JOB_SCOPE_ADMIN;
     }
+
+    public static function file_upload()
+    {
+        return FILE_SCOPE_UPLOAD;
+    }
 }

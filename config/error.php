@@ -18,3 +18,6 @@ define('CODE_UNKNOWN_AUTH', 5001);
 define('MSG_UNKNOWN_AUTH', '未知授权');
 
 define('CODE_TOKEN_ERROR', 5002);
+define('CODE_FILE_ERROR', 5003);
+define('CODE_UPLOAD_FILE', 5004);
+
