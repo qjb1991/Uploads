@@ -86,6 +86,12 @@ class MFile extends Model
                 ->where('id', $data['id'])
                 ->update(['update_at' => time()]);
 
+            if ($oss_type == 2) {
+
+                $str = $this->pathHandle($data['access_url']);
+                $path = OssUtils::getInstance()->signUrl($str);
+                return $path;
+            }
             return $data['access_url'];
         } else {
             $file_name = 'employment/pic/' . Utils::random(5) . time() . '.' . $type;
@@ -109,11 +115,23 @@ class MFile extends Model
                     'update_at' => time()
                 ];
                 Db::table($this->table)->insert($data);
+
+                if ($oss_type == 2) {
+                    $str = $this->pathHandle($path);
+                    $path = OssUtils::getInstance()->signUrl($str);
+                }
                 return $path;
             }
         }
 
         return false;
 
+    }
+
+    public function pathHandle($path)
+    {
+        $str = substr($path, strpos($path,'employment/pic/'));
+
+        return $str;
     }
 }
