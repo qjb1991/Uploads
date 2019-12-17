@@ -39,4 +39,20 @@ return [
     'upload_domain' => 'http://file.upload.com/',
     'upload_save_path' => dirname(__DIR__).DIRECTORY_SEPARATOR.'upload',
 
+    'oss' => [
+        'access_key_id' => Env::get('oss.access_key_id', ''),
+        'access_key_secret' => Env::get('oss.access_key_secret', ''),
+        'endpoint_net' => Env::get('oss.endpoint_net', ''),
+
+        'pub_bucket_host' => Env::get('oss.pub_bucket_host', ''),
+        'pub_bucket_name' => Env::get('oss.pub_bucket_name', ''),
+        'pub_endpoint_pir' => Env::get('oss.pub_endpoint_pir', ''),
+
+        'pri_bucket_host' => Env::get('oss.pri_bucket_host', ''),
+        'pri_bucket_name' => Env::get('oss.pri_bucket_name', ''),
+        'pri_endpoint_pir' => Env::get('oss.pri_endpoint_pir', ''),
+
+        'expire' => 3600
+    ]
+
 ];

@@ -6,16 +6,22 @@ use app\api\model\MFile;
 use app\api\model\MUploadLog;
 use app\api\validate\FileData;
 use app\common\controller\BaseApi;
+use app\common\lib\OssUtils;
 use app\common\lib\Utils;
 use think\App;
 use think\facade\Config;
+use think\facade\Log;
 use think\response\Json;
 
 class Uploader extends BaseApi
 {
     const FILE_UPLOAD = 'file_upload';
+    const FILE_SIZE = 10485760;     // 10M
     protected $model = null;
     protected $log_model = null;
+    protected $rules = null;
+    protected $validate = null;
+
 
     public function __construct(App $app = null)
     {
@@ -26,7 +32,6 @@ class Uploader extends BaseApi
         if ($this->log_model === null) {
             $this->log_model = new MUploadLog();
         }
-
     }
 
     public function index()
@@ -54,6 +59,7 @@ class Uploader extends BaseApi
         }
 
         $file = $this->request->file('file');
+        Log::info('index param file ======> ' . var_export($file, true));
         if (empty($file)) {
             return $this->response(['code' => CODE_FILE_ERROR, 'msg' => '请选择上传文件']);
         }
@@ -63,6 +69,8 @@ class Uploader extends BaseApi
         }
 
         try{
+            $oss_type = $this->request->post('type');   // 1:公有 2：私有
+            Log::info('index param type ======> ' . var_export($oss_type, true));
             $files = [];
             $types = Config::get('upload.type');
             if (!isset($types[$info->scope][$info->type])) {
@@ -72,10 +80,13 @@ class Uploader extends BaseApi
             foreach ($file as $item) {
                 list($_, $type) = explode('/', $item->getMime());
                 unset($_);
-                if (!in_array($type, $types[$info->scope][$info->type])) {
+                // 文件大小
+                $re = $item->checkSize(self::FILE_SIZE);
+
+
+                if (!in_array($type, $types[$info->scope][$info->type]) || !$re) {
                     continue;
                 }
-
                 $data = [
                     'token' => $this->request->header('lc-token'),
                     'app_name' => $this->request->header('lc-app'),
@@ -85,8 +96,9 @@ class Uploader extends BaseApi
                     'type' => $info->type
                 ];
                 $this->log_model->saveLog($data);
+//                $file = $this->save($item, $info);  // 保存本地
+                $file = $this->saveOss($item, $info->id, $info->scope, $oss_type, $type);
 
-                $file = $this->save($item, $info);
                 if (!$file) {
                     return $this->response(['code' => CODE_UPLOAD_FILE, 'msg' => '上传失败']);
                 } else {
@@ -111,7 +123,19 @@ class Uploader extends BaseApi
         if (!$file->isValid()) {
             return $this->response(CODE_FILE_ERROR, '非法上传');
         }
+
         $file = $this->model->saveFile($file, $info->id, $info->scope);
+
+        return $file;
+    }
+
+    public function saveOss($file, $uid, $scope, $oss_type, $type)
+    {
+        if (!$file->isValid()) {
+            return $this->response(CODE_FILE_ERROR, '非法上传');
+        }
+
+        $file = $this->model->saveOssFile($file, $uid, $scope, $oss_type, $type);
 
         return $file;
     }

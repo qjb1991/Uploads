@@ -239,4 +239,25 @@ class Utils
             return $e;
         }
     }
+
+    /**
+     * 随机 生成 字符串
+     * @param $numeric [只随机数字]
+     * @param int $length [随机字符串长度]
+     * @return string
+     */
+    public static function random($length = 1, $numeric = 0)
+    {
+        if ($numeric) {
+            $hash = sprintf('%0' . $length . 'd', mt_rand(0, pow(10, $length) - 1));
+        } else {
+            $hash = '';
+            $chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789abcdefghijklmnopqrstuvwxyz';
+            $max = strlen($chars) - 1;
+            for ($i = 0; $i < $length; $i++) {
+                $hash .= $chars[mt_rand(0, $max)];
+            }
+        }
+        return $hash;
+    }
 }

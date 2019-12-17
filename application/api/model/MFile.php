@@ -9,6 +9,7 @@
 namespace app\api\model;
 
 
+use app\common\lib\OssUtils;
 use app\common\lib\Utils;
 use think\Db;
 use think\facade\Config;
@@ -66,5 +67,53 @@ class MFile extends Model
             Db::table($this->table)->insert($data);
             return $path;
         }
+    }
+
+    public function saveOssFile($file, $uid, $scope, $oss_type, $type)
+    {
+        $src = $file->getInfo(); // 获取 上传 信息
+
+        $md5 = md5_file($src['tmp_name']);
+
+        $data = Db::table($this->table)
+            ->where([
+                'md5' => $md5,
+            ])
+            ->find();
+
+        if (!empty($data)) {
+            Db::table($this->table)
+                ->where('id', $data['id'])
+                ->update(['update_at' => time()]);
+
+            return $data['access_url'];
+        } else {
+            $file_name = 'employment/pic/' . Utils::random(5) . time() . '.' . $type;
+            $info = OssUtils::getInstance()->uploadFile($file_name, $src['tmp_name'], $oss_type);
+
+            unlink($src['tmp_name']);
+            if ($info) {
+                $path = $info['info']['url'];
+                list($_, $type) = explode('/', $src['type']);
+
+                $data = [
+                    'type' => $type,
+                    'row_name' => $src['name'],
+                    'access_url' => $path,
+                    'scope' => $scope,
+                    'save_url' => $path,
+                    'uid' => $uid,
+                    'create_at' => time(),
+                    'state' => 1,
+                    'md5' => $md5,
+                    'update_at' => time()
+                ];
+                Db::table($this->table)->insert($data);
+                return $path;
+            }
+        }
+
+        return false;
+
     }
 }
