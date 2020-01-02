@@ -90,7 +90,7 @@ class MFile extends Model
 
                 $str = $this->pathHandle($data['access_url']);
                 $path = OssUtils::getInstance()->signUrl($str);
-                return $path;
+                return $path . ',' . $data['access_url'];
             }
             return $data['access_url'];
         } else {
@@ -118,7 +118,9 @@ class MFile extends Model
 
                 if ($oss_type == 2) {
                     $str = $this->pathHandle($path);
-                    $path = OssUtils::getInstance()->signUrl($str);
+                    $decode_path = OssUtils::getInstance()->signUrl($str);
+
+                    return $decode_path . ',' . $path;
                 }
                 return $path;
             }
